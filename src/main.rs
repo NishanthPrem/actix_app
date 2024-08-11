@@ -12,11 +12,11 @@ struct PathParameters {
 #[derive(Deserialize, Debug)]
 struct LoginReq {
     username: String,
-    password: String
+    password: String,
 }
 
 struct AppState {
-    state: Mutex<String>
+    state: Mutex<String>,
 }
 
 #[get("/")]
@@ -25,7 +25,7 @@ async fn home() -> impl Responder {
 }
 
 #[post("/login")]
-async fn login(app_data:web::Data<AppState>, req: web::Json<LoginReq>) -> impl Responder {
+async fn login(app_data: web::Data<AppState>, req: web::Json<LoginReq>) -> impl Responder {
     let mut state = app_data.state.lock().unwrap();
     println!("current state: {}", state);
     *state = String::from("login");
@@ -35,7 +35,11 @@ async fn login(app_data:web::Data<AppState>, req: web::Json<LoginReq>) -> impl R
 }
 
 #[get("/logout/{name}")]
-async fn logout(name: web::Path<String>) -> impl Responder {
+async fn logout(app_data: web::Data<AppState>, name: web::Path<String>) -> impl Responder {
+    let mut state = app_data.state.lock().unwrap();
+    println!("current state: {}", state);
+    *state = String::from("logout");
+    println!("updated state: {}", state);
     HttpResponse::Ok().body(format!("Hello {}, you have been logged out", &name))
 }
 
@@ -55,7 +59,6 @@ async fn get_user(path: web::Query<PathParameters>) -> impl Responder {
     ))
 }
 
-
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
@@ -64,17 +67,17 @@ async fn echo(req_body: String) -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let data = web::Data::new(AppState {
-        state: Mutex::new(String::from("init-state"))
+        state: Mutex::new(String::from("init-state")),
     });
     HttpServer::new(move || {
         App::new()
-        .app_data(data.clone())
+            .app_data(data.clone())
             .service(
                 web::scope("/auth")
                     .service(login)
                     .service(logout)
                     .service(fetch_user)
-                    .service(get_user)
+                    .service(get_user),
             )
             .service(home)
             .service(echo)
