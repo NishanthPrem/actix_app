@@ -7,6 +7,11 @@ struct PathParameters {
     id: String,
     email: String,
 }
+#[derive(Deserialize, Debug)]
+struct LoginReq {
+    username: String,
+    password: String
+}
 
 #[get("/")]
 async fn home() -> impl Responder {
@@ -14,7 +19,8 @@ async fn home() -> impl Responder {
 }
 
 #[post("/login")]
-async fn login() -> impl Responder {
+async fn login(req: web::Json<LoginReq>) -> impl Responder {
+    println!("Youre credentials are {}: {}", req.username, req.password);
     HttpResponse::Ok().body("Login")
 }
 
@@ -24,12 +30,21 @@ async fn logout(name: web::Path<String>) -> impl Responder {
 }
 
 #[get("/fetch/{name}/{id}/{email}")]
-async fn fetch(path: web::Path<PathParameters>) -> impl Responder {
+async fn fetch_user(path: web::Path<PathParameters>) -> impl Responder {
     HttpResponse::Ok().body(format!(
         "Hello {}, Your ID is {} and email is {}",
         &path.name, &path.id, &path.email
     ))
 }
+
+#[get("/user")]
+async fn get_user(path: web::Query<PathParameters>) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Hello {}, Your ID is {} and email is {}",
+        &path.name, &path.id, &path.email
+    ))
+}
+
 
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
@@ -44,7 +59,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/auth")
                     .service(login)
                     .service(logout)
-                    .service(fetch),
+                    .service(fetch_user)
+                    .service(get_user)
             )
             .service(home)
             .service(echo)
