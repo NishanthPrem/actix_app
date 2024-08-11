@@ -1,4 +1,12 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct PathParameters {
+    name: String,
+    id: String,
+    email: String,
+}
 
 #[get("/")]
 async fn home() -> impl Responder {
@@ -10,9 +18,17 @@ async fn login() -> impl Responder {
     HttpResponse::Ok().body("Login")
 }
 
-#[get("/logout")]
-async fn logout() -> impl Responder {
-    HttpResponse::Ok().body("Logout")
+#[get("/logout/{name}")]
+async fn logout(name: web::Path<String>) -> impl Responder {
+    HttpResponse::Ok().body(format!("Hello {}, you have been logged out", &name))
+}
+
+#[get("/fetch/{name}/{id}/{email}")]
+async fn fetch(path: web::Path<PathParameters>) -> impl Responder {
+    HttpResponse::Ok().body(format!(
+        "Hello {}, Your ID is {} and email is {}",
+        &path.name, &path.id, &path.email
+    ))
 }
 
 #[post("/echo")]
@@ -24,7 +40,12 @@ async fn echo(req_body: String) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
-            .service(web::scope("/auth").service(login).service(logout))
+            .service(
+                web::scope("/auth")
+                    .service(login)
+                    .service(logout)
+                    .service(fetch),
+            )
             .service(home)
             .service(echo)
     })
