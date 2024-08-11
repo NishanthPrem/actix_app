@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 
@@ -13,13 +15,21 @@ struct LoginReq {
     password: String
 }
 
+struct AppState {
+    state: Mutex<String>
+}
+
 #[get("/")]
 async fn home() -> impl Responder {
     HttpResponse::Ok().body("Home Page")
 }
 
 #[post("/login")]
-async fn login(req: web::Json<LoginReq>) -> impl Responder {
+async fn login(app_data:web::Data<AppState>, req: web::Json<LoginReq>) -> impl Responder {
+    let mut state = app_data.state.lock().unwrap();
+    println!("current state: {}", state);
+    *state = String::from("login");
+    println!("updated state: {}", state);
     println!("Youre credentials are {}: {}", req.username, req.password);
     HttpResponse::Ok().body("Login")
 }
@@ -53,8 +63,12 @@ async fn echo(req_body: String) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let data = web::Data::new(AppState {
+        state: Mutex::new(String::from("init-state"))
+    });
+    HttpServer::new(move || {
         App::new()
+        .app_data(data.clone())
             .service(
                 web::scope("/auth")
                     .service(login)
