@@ -3,45 +3,24 @@ use std::sync::Mutex;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 
+mod api;
+mod handlers;
+mod models;
+mod utils;
+
 #[derive(Deserialize)]
 struct PathParameters {
     name: String,
     id: String,
     email: String,
 }
-#[derive(Deserialize, Debug)]
-struct LoginReq {
-    username: String,
-    password: String,
-}
 
-struct AppState {
-    state: Mutex<String>,
-}
 
 #[get("/")]
 async fn home() -> impl Responder {
     HttpResponse::Ok().body("Home Page")
 }
 
-#[post("/login")]
-async fn login(app_data: web::Data<AppState>, req: web::Json<LoginReq>) -> impl Responder {
-    let mut state = app_data.state.lock().unwrap();
-    println!("current state: {}", state);
-    *state = String::from("login");
-    println!("updated state: {}", state);
-    println!("Youre credentials are {}: {}", req.username, req.password);
-    HttpResponse::Ok().body("Login")
-}
-
-#[get("/logout/{name}")]
-async fn logout(app_data: web::Data<AppState>, name: web::Path<String>) -> impl Responder {
-    let mut state = app_data.state.lock().unwrap();
-    println!("current state: {}", state);
-    *state = String::from("logout");
-    println!("updated state: {}", state);
-    HttpResponse::Ok().body(format!("Hello {}, you have been logged out", &name))
-}
 
 #[get("/fetch/{name}/{id}/{email}")]
 async fn fetch_user(path: web::Path<PathParameters>) -> impl Responder {
