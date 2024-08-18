@@ -1,6 +1,5 @@
-use actix_web::{get, web, HttpResponse, Responder};
 use crate::models::state;
-
+use actix_web::{get, web, HttpResponse, Responder};
 
 #[get("/logout/{name}")]
 async fn logout(app_data: web::Data<state::AppState>, name: web::Path<String>) -> impl Responder {

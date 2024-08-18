@@ -1,8 +1,5 @@
 use std::sync::Mutex;
 
-
 pub struct AppState {
-   pub state: Mutex<String>,
+    pub state: Mutex<String>,
 }
-
-
