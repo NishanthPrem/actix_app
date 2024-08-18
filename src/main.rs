@@ -26,9 +26,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(data.clone())
             .service(api::public::get_public_services())
-            .service(
-                web::scope("/auth"), // .service(logout)
-            )
             .service(home)
             .service(echo)
     })
