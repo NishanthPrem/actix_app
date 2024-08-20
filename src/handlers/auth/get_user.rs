@@ -1,6 +1,5 @@
-use actix_web::{get, web, HttpResponse, Responder};
 use crate::models::auth;
-
+use actix_web::{get, web, HttpResponse, Responder};
 
 #[get("/user")]
 async fn get_user(path: web::Query<auth::PathParameters>) -> impl Responder {
