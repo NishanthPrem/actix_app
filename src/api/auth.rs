@@ -5,5 +5,4 @@ pub fn get_auth_services() -> actix_web::Scope {
     .service(get_user::get_user)
     .service(fetch_user::fetch_user)
     .service(logout::logout)
-    // .service(logout)
 }
