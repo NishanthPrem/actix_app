@@ -6,5 +6,4 @@ curl -X POST http://localhost:8080/echo -H "Content-Type: text/plain" -d "This i
 
 curl -X GET "http://localhost:8080/auth/fetch/john/123/john@example.com"
 
-curl -X POST http://localhost:8080/auth/login -H "Content-Type: application/json" -d '{"username":"Nishanth","password":"1234"}'
-
+curl -X POST http://localhost:8080/public/login -H "Content-Type: application/json" -d '{"username":"Nishanth","password":"1234"}'
