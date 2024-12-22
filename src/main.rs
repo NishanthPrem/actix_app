@@ -1,6 +1,8 @@
 use std::sync::Mutex;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
 
 mod api;
 mod handlers;
@@ -22,6 +24,12 @@ async fn main() -> std::io::Result<()> {
     let data = web::Data::new(models::state::AppState {
         state: Mutex::new(String::from("init-state")),
     });
+    let subscirber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+    tracing::subscriber::set_global_default(subscirber).expect("setting default subscriber failed");
+
+    info!("Starting server at http://localhost:8080");
     HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
